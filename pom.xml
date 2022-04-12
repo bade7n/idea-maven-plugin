@@ -159,5 +159,10 @@
             <version>1.5</version>
         </dependency>
     </dependencies>
-
+    <distributionManagement>
+        <repository>
+            <id>teamcity-space</id>
+            <url>https://packages.jetbrains.team/maven/p/tc/maven</url>
+        </repository>
+    </distributionManagement>
 </project>
