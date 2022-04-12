@@ -41,8 +41,8 @@ class VelocityWorker {
         Velocity.init();
 
         imlTemplate = Velocity.getTemplate("ideaplugin/idea-iml.vm");
-        iprTemplate = Velocity.getTemplate("ideaplugin/idea-ipr.vm");
-        iwsTemplate = Velocity.getTemplate("ideaplugin/idea-iws.vm");
+//        iprTemplate = Velocity.getTemplate("ideaplugin/idea-ipr.vm");
+//        iwsTemplate = Velocity.getTemplate("ideaplugin/idea-iws.vm");
     }
 
     // Getters
@@ -51,11 +51,4 @@ class VelocityWorker {
         return imlTemplate;
     }
 
-    public Template getIprTemplate() {
-        return iprTemplate;
-    }
-
-    public Template getIwsTemplate() {
-        return iwsTemplate;
-    }
 }

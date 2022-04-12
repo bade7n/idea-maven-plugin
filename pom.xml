@@ -9,7 +9,7 @@
         <version>7</version>
     </parent>
 
-    <groupId>com.github.zhve</groupId>
+    <groupId>com.github.bade7n</groupId>
     <artifactId>idea-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <version>3.0b1</version>
@@ -17,7 +17,7 @@
     <name>IDEA Maven Plugin</name>
     <description>IntelliJIdea Workspace Creator</description>
     <inceptionYear>2010</inceptionYear>
-    <url>https://github.com/zhve/idea-maven-plugin</url>
+    <url>https://github.com/bade7n/idea-maven-plugin</url>
 
     <properties>
         <maven.version>2.2.1</maven.version>
@@ -36,14 +36,14 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:zhve/idea-maven-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:zhve/idea-maven-plugin.git</developerConnection>
-        <url>https://github.com/zhve/idea-maven-plugin</url>
+        <connection>scm:git:git@github.com:bade7n/idea-maven-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:bade7n/idea-maven-plugin.git</developerConnection>
+        <url>https://github.com/bade7n/idea-maven-plugin</url>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/zhve/idea-maven-plugin/issues</url>
+        <url>https://github.com/bade7n/idea-maven-plugin/issues</url>
     </issueManagement>
 
     <developers>
@@ -82,6 +82,7 @@
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
+                    <goalPrefix>idea1</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                 </configuration>
                 <executions>

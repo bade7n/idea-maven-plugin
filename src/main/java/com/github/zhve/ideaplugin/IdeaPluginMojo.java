@@ -19,6 +19,8 @@ package com.github.zhve.ideaplugin;
  * under the License.
  */
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.model.IssueManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -196,104 +198,29 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
         context.put("packagingPom", "pom".equals(project.getPackaging()));
         context.put("packagingWar", "war".equals(project.getPackaging()));
         context.put("project", project);
+        context.put("idea", new IdeaUtil(project.getBasedir().getAbsolutePath()));
 
         // generate iml file
         createFile(context, velocityWorker.getImlTemplate(), "iml");
+    }
 
-        // for non execution root just exit
-        if (!getProject().isExecutionRoot()) return;
 
-        // fill ipr-attributes
-        context.put("M", getLocalRepositoryBasePath());
-        context.put("assembleModulesIntoJars", assembleModulesIntoJars);
-        context.put("jdkName", jdkName);
-        context.put("jdkLevel", jdkLevel);
-        context.put("wildcardResourcePatterns", Util.escapeXmlAttribute(wildcardResourcePatterns));
-        List<MavenProject> warProjects = artifactHolder.getProjectsWithPackaging("war");
-        // check id uniques
-        Set<String> used = new HashSet<String>();
-        for (MavenProject item : warProjects)
-            if (!used.add(item.getArtifactId()))
-                throw new MojoExecutionException("Two or more war-packagins projects in reactor have the same artifactId, please make sure that <artifactId> is unique for each war-packagins project.");
-        Collections.sort(warProjects, ProjectComparator.INSTANCE);
-        context.put("warProjects", warProjects);
+    public String formatGAV(Artifact artifact) {
+        return String.format("Maven: %s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+    }
 
-        IssueManagement issueManagement = getProject().getIssueManagement();
-        if (issueManagement != null) {
-            String system = issueManagement.getSystem();
-            String url = issueManagement.getUrl();
-            if ("Redmine".equalsIgnoreCase(system)) {
-                context.put("issueNavigationExist", Boolean.TRUE);
-                context.put("issueRegexp", "\\d+");
-                context.put("linkRegexp", url + "/issues/$0");
-            } else if ("JIRA".equalsIgnoreCase(system)) {
-                context.put("issueNavigationExist", Boolean.TRUE);
-                context.put("issueRegexp", "[A-Z]+\\-\\d+");
-                context.put("linkRegexp", url + "/browse/$0");
-            } else if ("YouTrack".equalsIgnoreCase(system)) {
-                context.put("issueNavigationExist", Boolean.TRUE);
-                context.put("issueRegexp", "[A-Z]+\\-\\d+");
-                context.put("linkRegexp", url + "/issue/$0");
-            } else if ("Google Code".equalsIgnoreCase(system)) {
-                context.put("issueNavigationExist", Boolean.TRUE);
-                context.put("issueRegexp", "\\d+");
-                context.put("linkRegexp", url + "/issues/detail?id=$0");
-            } else if ("GitHub".equalsIgnoreCase(system)) {
-                context.put("issueNavigationExist", Boolean.TRUE);
-                context.put("issueRegexp", "\\d+");
-                context.put("linkRegexp", url + "/$0");
-            }
-        }
+    public String formatScope(Artifact artifact) {
+        if (Artifact.SCOPE_COMPILE.equalsIgnoreCase(getScope(artifact))) {
+            return "";
+        } else
+            return String.format(" scope=\"%s\"", artifact.getScope().toUpperCase());
+    }
 
-        createFile(context, velocityWorker.getIprTemplate(), "ipr");
-
-        // fill iws-attributes
-        context.put("compileInBackground", compileInBackground);
-        context.put("assertNotNull", assertNotNull);
-        context.put("hideEmptyPackages", hideEmptyPackages);
-        context.put("autoscrollToSource", autoscrollToSource);
-        context.put("autoscrollFromSource", autoscrollFromSource);
-        context.put("sortByType", sortByType);
-        context.put("optimizeImportsBeforeCommit", optimizeImportsBeforeCommit);
-        context.put("reformatCodeBeforeCommit", reformatCodeBeforeCommit);
-        context.put("performCodeAnalysisBeforeCommit", performCodeAnalysisBeforeCommit);
-
-        if (!warProjects.isEmpty()) {
-            // fill war-attributes
-            MavenProject warProject = getDefaultWarProject(warProjects);
-            context.put("warProject", warProject);
-            warProjects.remove(warProject);
-            context.put("otherWarProjects", warProjects);
-            context.put("applicationServerTitle", StringUtils.isEmpty(applicationServerTitle) ? warProject.getArtifactId() : Util.escapeXmlAttribute(applicationServerTitle));
-            context.put("applicationServerName", gaeHome == null ? applicationServerName : "Google AppEngine Dev");
-            context.put("applicationServerVersion", applicationServerVersion);
-            context.put("openInBrowser", openInBrowser);
-            context.put("openInBrowserUrl", Util.escapeXmlAttribute(openInBrowserUrl));
-            context.put("vmParameters", vmParameters == null ? "" : Util.escapeXmlAttribute(vmParameters));
-            context.put("deploymentContextPath", deploymentContextPath);
-
-            if (gaeHome != null) {
-                context.put("applicationServerConfigurationType", "GoogleAppEngineDevServer");
-                context.put("applicationServerFullName", applicationServerFullName == null ? "AppEngine Dev" : applicationServerFullName);
-            } else if ("Tomcat".equals(applicationServerName)) {
-                context.put("applicationServerConfigurationType", "#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory");
-                context.put("applicationServerFullName", applicationServerFullName == null ? applicationServerName + " " + applicationServerVersion : applicationServerFullName);
-            } else if ("Jetty".equals(applicationServerName)) {
-                context.put("applicationServerConfigurationType", "org.codebrewer.idea.jetty.JettyRunConfigurationType");
-                context.put("applicationServerFullName", applicationServerFullName == null ? applicationServerName + " " + applicationServerVersion : applicationServerFullName);
-            } else
-                throw new MojoExecutionException("Unknown applicationServerName: " + applicationServerName + ", possible values: Tomcat, Jetty");
-        }
-
-        createFile(context, velocityWorker.getIwsTemplate(), "iws");
-
-        File idea = new File(project.getBasedir(), ".idea");
-        if (idea.exists()) {
-            getLog().info("");
-            getLog().info("Delete Workspace Files:");
-            getLog().info("");
-            Util.deleteFileOrDirectory(getLog(), idea);
-        }
+    public String formatExported(Artifact artifact) {
+        if (Artifact.SCOPE_COMPILE.equalsIgnoreCase(getScope(artifact))) {
+            return " exported=\"\"";
+        } else
+            return "";
     }
 
     private MavenProject getDefaultWarProject(List<MavenProject> warProjects) {
