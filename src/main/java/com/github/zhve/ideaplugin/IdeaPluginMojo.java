@@ -206,7 +206,10 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
 
 
     public String formatGAV(Artifact artifact) {
-        return String.format("Maven: %s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+        if (artifact.hasClassifier()) {
+            return String.format("Maven: %s:%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getClassifier(), artifact.getVersion());
+        } else
+            return String.format("Maven: %s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
     }
 
     public String formatScope(Artifact artifact) {
