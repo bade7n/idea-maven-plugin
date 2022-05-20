@@ -44,7 +44,7 @@
 #end
 #foreach($resource in $project.build.testResources)
 #if(!$resource.targetPath)
-      <sourceFolder url="file://$idea.relativePath($resource.directory)" isTestSource="true" />
+      <sourceFolder url="file://$idea.relativePath($resource.directory)" type="java-test-resource" />
 #end
 #end
       <excludeFolder url="file://$idea.relativePath($buildDirectory)" />
