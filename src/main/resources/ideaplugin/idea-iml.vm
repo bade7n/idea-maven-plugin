@@ -22,7 +22,7 @@
     </facet>
   </component>
 #end
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
 #if($packagingPom)
     <content url="file://$MD">
       <excludeFolder url="file://$idea.relativePath($buildDirectory)" />
