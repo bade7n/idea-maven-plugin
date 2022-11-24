@@ -20,6 +20,8 @@ package com.github.zhve.ideaplugin;
  */
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -117,7 +119,12 @@ public abstract class IdeaPluginMojoBase extends AbstractMojo {
     }
 
     public boolean isReactorArtifact(Artifact artifact) {
-        return artifactHolder.isReactorArtifact(artifact);
+        boolean isReactorArtifact = artifactHolder.isReactorArtifact(artifact);
+        if (!isReactorArtifact && artifact.hasClassifier()) {
+            DefaultArtifact af = new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersionRange().cloneOf(), artifact.getScope(), "war", null, artifact.getArtifactHandler(), artifact.isOptional());
+            isReactorArtifact = artifactHolder.isReactorArtifact(af);
+        }
+        return isReactorArtifact;
     }
 
     public String getScope(Artifact artifact) {

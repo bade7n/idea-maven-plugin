@@ -5,10 +5,10 @@
     <facet type="web" name="$project.artifactId">
       <configuration>
         <descriptors>
-          <deploymentDescriptor name="web.xml" url="file://$MD/src/main/webapp/WEB-INF/web.xml" />
+          <deploymentDescriptor name="web.xml" url="file://$MD/webapp/WEB-INF/web.xml" />
         </descriptors>
         <webroots>
-          <root url="file://$MD/src/main/webapp" relative="/" />
+          <root url="file://$MD/webapp" relative="/" />
         </webroots>
         <context-artifact name="$project.artifactId exploded-war" />
       </configuration>
