@@ -26,6 +26,7 @@ import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -118,11 +119,21 @@ public abstract class IdeaPluginMojoBase extends AbstractMojo {
         return artifactHolder.getAllDependencies();
     }
 
-    public boolean isReactorArtifact(Artifact artifact) {
+    public boolean isReactorArtifact(Artifact artifact) throws MojoExecutionException {
         boolean isReactorArtifact = artifactHolder.isReactorArtifact(artifact);
-        if (!isReactorArtifact && artifact.hasClassifier()) {
-            DefaultArtifact af = new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersionRange().cloneOf(), artifact.getScope(), "war", null, artifact.getArtifactHandler(), artifact.isOptional());
-            isReactorArtifact = artifactHolder.isReactorArtifact(af);
+        try {
+            if (!isReactorArtifact && artifact.hasClassifier()) {
+                VersionRange versionRange = artifact.getVersionRange();
+                if(versionRange == null)
+                    versionRange = VersionRange.createFromVersion(artifact.getVersion());
+                else {
+                    versionRange = versionRange.cloneOf();
+                }
+                DefaultArtifact af = new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), versionRange.cloneOf(), artifact.getScope(), "war", null, artifact.getArtifactHandler(), artifact.isOptional());
+                isReactorArtifact = artifactHolder.isReactorArtifact(af);
+            }
+        } catch (Exception e) {
+            throw new MojoExecutionException("Error while generation iml files for " + project.getBasedir() + " artifact: " +  artifact.toString());
         }
         return isReactorArtifact;
     }
