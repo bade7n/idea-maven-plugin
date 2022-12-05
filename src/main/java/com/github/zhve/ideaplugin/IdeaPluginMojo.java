@@ -229,7 +229,7 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
     }
 
     private boolean validFile(Path s) {
-        return !s.endsWith(".java");
+        return !s.toString().endsWith("java");
     }
 
     public String formatGAV(Artifact artifact) {
