@@ -32,8 +32,14 @@ import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Vasiliy Zhukov
@@ -199,11 +205,32 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
         context.put("packagingWar", "war".equals(project.getPackaging()));
         context.put("project", project);
         context.put("idea", new IdeaUtil(project.getBasedir().getAbsolutePath()));
-
+        checkIfExtraResourcesinSource(getProject().getBuild().getTestSourceDirectory());
+        checkIfExtraResourcesinSource(getProject().getBuild().getSourceDirectory());
         // generate iml file
         createFile(context, velocityWorker.getImlTemplate(), "iml");
     }
 
+    private void checkIfExtraResourcesinSource(String dir) throws MojoExecutionException {
+        List<Path> result;
+        if (!new File(dir).exists())
+            return;
+        try (Stream<Path> walk = Files.walk(Paths.get(dir))) {
+             result = walk
+                    .filter(p -> !Files.isDirectory(p))   // not a directory
+                    .filter(this::validFile)       // check end with
+                    .collect(Collectors.toList());        // collect all matched to a List
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (!result.isEmpty()) {
+            throw new MojoExecutionException("Error while building " + getProject().getBasedir() + " errors found in src: " + result);
+        }
+    }
+
+    private boolean validFile(Path s) {
+        return !s.endsWith(".java");
+    }
 
     public String formatGAV(Artifact artifact) {
         if (artifact.hasClassifier()) {
