@@ -224,7 +224,7 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
             throw new RuntimeException(e);
         }
         if (!result.isEmpty()) {
-            throw new MojoExecutionException("Error while building " + getProject().getBasedir() + " errors found in src: " + result);
+            getLog().warn("Error while building " + getProject().getBasedir() + " errors found in src: " + result);
         }
     }
 
