@@ -35,6 +35,8 @@ import org.apache.maven.project.MavenProject;
 import java.io.File;
 import java.util.*;
 
+import static com.github.zhve.ideaplugin.IdeaPluginMojoBase.createWarArtifact;
+
 /**
  * @author Vasiliy Zhukov
  * @since 5/31/2014
@@ -108,7 +110,7 @@ public class ArtifactDependencyResolver {
             for (Object object : project.getDependencies()) {
                 Dependency dependency = (Dependency) object;
                 Artifact dependencyArtifact = toDependencyArtifact(artifactFactory, dependency);
-                boolean reactor = reactorArtifacts.contains(dependencyArtifact);
+                boolean reactor = isReactorContains(reactorArtifacts, dependencyArtifact);
                 String id = dependencyArtifact.getId() + ":" + dependencyArtifact.getScope();
                 if ("jar".equals(dependencyArtifact.getType())) {
                     if (reactor) {
@@ -141,7 +143,7 @@ public class ArtifactDependencyResolver {
             while (!queue.isEmpty()) {
                 Artifact artifact = queue.poll();
                 log.info("# " + artifact.getId() + ":" + artifact.getScope());
-                DependencyData artifactDependencyData = dependencyMap.get(artifact);
+                DependencyData artifactDependencyData = getArtifactDependencyData(dependencyMap, artifact);
 
                 // analyze all remote dependencies for given level
                 for (Artifact dependency : artifactDependencyData.getRemoteList()) {
@@ -202,6 +204,22 @@ public class ArtifactDependencyResolver {
                 }
             }
             result.put(project, new DependencyData(new ArrayList<Artifact>(remoteData.values()), new ArrayList<Artifact>(reactorData.values())));
+        }
+        return result;
+    }
+
+    private static DependencyData getArtifactDependencyData(Map<Artifact, DependencyData> dependencyMap, Artifact artifact) {
+        DependencyData dd = dependencyMap.get(artifact);
+        if (dd == null && artifact.hasClassifier()) {
+            dd = dependencyMap.get(createWarArtifact(artifact));
+        }
+        return dd;
+    }
+
+    private static boolean isReactorContains(Set<Artifact> reactorArtifacts, Artifact dependencyArtifact) {
+        boolean result = reactorArtifacts.contains(dependencyArtifact);
+        if (!result && dependencyArtifact.hasClassifier()) {
+            result = reactorArtifacts.contains(createWarArtifact(dependencyArtifact));
         }
         return result;
     }
@@ -277,7 +295,7 @@ public class ArtifactDependencyResolver {
             log.info("After:");
             for (Object resolutionNode : resolutionResult.getArtifactResolutionNodes()) {
                 Artifact art = ((ResolutionNode) resolutionNode).getArtifact();
-                if (reactorArtifacts.contains(art)) {
+                if (isReactorContains(reactorArtifacts, art)) {
                     if (!reactorData.contains(art)) {
                         reactorData.add(art);
                         log.info("R " + art.getId() + ":" + art.getScope());

@@ -25,6 +25,7 @@ import org.apache.maven.model.IssueManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -45,7 +46,7 @@ import java.util.stream.Stream;
  * @author Vasiliy Zhukov
  * @since 07/25/2010
  */
-@Mojo(name = "idea", aggregator = true)
+@Mojo(name = "idea", aggregator = true, requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class IdeaPluginMojo extends IdeaPluginMojoBase {
     /**
      * Enables/disables the assembling modules in jars for web artifacts

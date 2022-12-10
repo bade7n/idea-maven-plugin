@@ -64,6 +64,9 @@ public abstract class IdeaPluginMojoBase extends AbstractMojo {
     @Parameter(property = "localRepository", required = true, readonly = true)
     private ArtifactRepository localRepository;
 
+    @Parameter(defaultValue = "${project.compileClasspathElements}", readonly = true, required = true)
+    private List<String> compilePath;
+
     private ArtifactHolder artifactHolder;
     private VelocityWorker velocityWorker;
     private MavenProject project;
@@ -123,19 +126,23 @@ public abstract class IdeaPluginMojoBase extends AbstractMojo {
         boolean isReactorArtifact = artifactHolder.isReactorArtifact(artifact);
         try {
             if (!isReactorArtifact && artifact.hasClassifier()) {
-                VersionRange versionRange = artifact.getVersionRange();
-                if(versionRange == null)
-                    versionRange = VersionRange.createFromVersion(artifact.getVersion());
-                else {
-                    versionRange = versionRange.cloneOf();
-                }
-                DefaultArtifact af = new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), versionRange.cloneOf(), artifact.getScope(), "war", null, artifact.getArtifactHandler(), artifact.isOptional());
+                DefaultArtifact af = createWarArtifact(artifact);
                 isReactorArtifact = artifactHolder.isReactorArtifact(af);
             }
         } catch (Exception e) {
             throw new MojoExecutionException("Error while generation iml files for " + project.getBasedir() + " artifact: " +  artifact.toString());
         }
         return isReactorArtifact;
+    }
+
+    public static DefaultArtifact createWarArtifact(Artifact artifact) {
+        VersionRange versionRange = artifact.getVersionRange();
+        if(versionRange == null)
+            versionRange = VersionRange.createFromVersion(artifact.getVersion());
+        else {
+            versionRange = versionRange.cloneOf();
+        }
+        return new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), versionRange.cloneOf(), artifact.getScope(), "war", null, artifact.getArtifactHandler(), artifact.isOptional());
     }
 
     public String getScope(Artifact artifact) {
