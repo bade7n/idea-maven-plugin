@@ -35,6 +35,7 @@ import org.apache.maven.project.MavenProject;
 import java.io.File;
 import java.util.*;
 
+import static com.github.zhve.ideaplugin.IdeaPluginMojoBase.createTestArtifact;
 import static com.github.zhve.ideaplugin.IdeaPluginMojoBase.createWarArtifact;
 
 /**
@@ -112,7 +113,7 @@ public class ArtifactDependencyResolver {
                 Artifact dependencyArtifact = toDependencyArtifact(artifactFactory, dependency);
                 boolean reactor = isReactorContains(reactorArtifacts, dependencyArtifact);
                 String id = dependencyArtifact.getId() + ":" + dependencyArtifact.getScope();
-                if ("jar".equals(dependencyArtifact.getType())) {
+                if (Arrays.asList("test-jar","jar").contains(dependencyArtifact.getType())) {
                     if (reactor) {
                         log.info("R " + id);
                         reactorData.add(dependencyArtifact);
@@ -211,7 +212,10 @@ public class ArtifactDependencyResolver {
     private static DependencyData getArtifactDependencyData(Map<Artifact, DependencyData> dependencyMap, Artifact artifact) {
         DependencyData dd = dependencyMap.get(artifact);
         if (dd == null && artifact.hasClassifier()) {
-            dd = dependencyMap.get(createWarArtifact(artifact));
+            if ("classes".equalsIgnoreCase(artifact.getClassifier()))
+                dd = dependencyMap.get(createWarArtifact(artifact));
+            else if ("tests".equalsIgnoreCase(artifact.getClassifier()))
+                dd = dependencyMap.get(createTestArtifact(artifact));
         }
         return dd;
     }
@@ -219,7 +223,11 @@ public class ArtifactDependencyResolver {
     private static boolean isReactorContains(Set<Artifact> reactorArtifacts, Artifact dependencyArtifact) {
         boolean result = reactorArtifacts.contains(dependencyArtifact);
         if (!result && dependencyArtifact.hasClassifier()) {
-            result = reactorArtifacts.contains(createWarArtifact(dependencyArtifact));
+            if (dependencyArtifact.getClassifier().equalsIgnoreCase("classes"))
+                result = reactorArtifacts.contains(createWarArtifact(dependencyArtifact));
+            else if (dependencyArtifact.getClassifier().equalsIgnoreCase("tests")) {
+                result = reactorArtifacts.contains(createTestArtifact(dependencyArtifact));
+            }
         }
         return result;
     }

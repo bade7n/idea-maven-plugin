@@ -23,6 +23,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
@@ -126,8 +127,11 @@ public abstract class IdeaPluginMojoBase extends AbstractMojo {
         boolean isReactorArtifact = artifactHolder.isReactorArtifact(artifact);
         try {
             if (!isReactorArtifact && artifact.hasClassifier()) {
-                DefaultArtifact af = createWarArtifact(artifact);
-                isReactorArtifact = artifactHolder.isReactorArtifact(af);
+                if ("classes".equalsIgnoreCase(artifact.getClassifier())) {
+                    isReactorArtifact = artifactHolder.isReactorArtifact(createWarArtifact(artifact));
+                } else if ("tests".equalsIgnoreCase(artifact.getClassifier())) {
+                    isReactorArtifact = artifactHolder.isReactorArtifact(createTestArtifact(artifact));
+                }
             }
         } catch (Exception e) {
             throw new MojoExecutionException("Error while generation iml files for " + project.getBasedir() + " artifact: " +  artifact.toString());
@@ -143,6 +147,16 @@ public abstract class IdeaPluginMojoBase extends AbstractMojo {
             versionRange = versionRange.cloneOf();
         }
         return new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), versionRange.cloneOf(), artifact.getScope(), "war", null, artifact.getArtifactHandler(), artifact.isOptional());
+    }
+
+    public static DefaultArtifact createTestArtifact(Artifact artifact) {
+        VersionRange versionRange = artifact.getVersionRange();
+        if(versionRange == null)
+            versionRange = VersionRange.createFromVersion(artifact.getVersion());
+        else {
+            versionRange = versionRange.cloneOf();
+        }
+        return new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), versionRange.cloneOf(), artifact.getScope(), "jar", null, new DefaultArtifactHandler(), artifact.isOptional());
     }
 
     public String getScope(Artifact artifact) {
