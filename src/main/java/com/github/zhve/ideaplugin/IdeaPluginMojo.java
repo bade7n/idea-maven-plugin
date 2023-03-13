@@ -241,10 +241,12 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
     }
 
     public String formatSystemPath(Artifact artifact) {
-        if (artifact.hasClassifier()) {
-            return String.format("Maven: %s:%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getClassifier(), artifact.getVersion());
+        if (artifact.getFile() != null) {
+            File basedir = getProject().getBasedir();
+            Path relativePath = basedir.toPath().relativize(artifact.getFile().toPath());
+            return String.format("$MODULE_DIR$/%s", relativePath.toString());
         } else
-            return String.format("Maven: %s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+            return "FILE_NOT_SET";
     }
 
     public boolean isSystemScope(Artifact artifact) {

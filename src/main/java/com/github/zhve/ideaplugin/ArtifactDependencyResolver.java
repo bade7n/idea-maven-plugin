@@ -280,6 +280,8 @@ public class ArtifactDependencyResolver {
         );
         if (dependencyArtifact != null)
             dependencyArtifact.setDependencyFilter(dependency.getDependencyFilter());
+        if (dependencyArtifact != null)
+            dependencyArtifact.setFile(dependency.getFile());
         return dependencyArtifact;
     }
 
