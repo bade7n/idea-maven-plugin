@@ -62,7 +62,19 @@
 #if($context.isReactorArtifact($artifact))
     <orderEntry type="module"$context.formatScope($artifact)$context.formatExported($artifact) module-name="$artifact.artifactId" />
 #else
-    <orderEntry type="library"$context.formatScope($artifact)$context.formatExported($artifact) name="$context.formatGAV($artifact)" level="project" />
+    #if ($context.isSystemScope($artifact))
+    <orderEntry type="module-library" scope="TEST">
+        <library>
+            <CLASSES>
+                <root url="file://\$MODULE_DIR$/../$context.formatSystemPath($artifact)" />
+            </CLASSES>
+            <JAVADOC />
+            <SOURCES />
+        </library>
+    </orderEntry>
+    #else
+        <orderEntry type="library"$context.formatScope($artifact)$context.formatExported($artifact) name="$context.formatGAV($artifact)" level="project" />
+    #end
 #end
 #end
   </component>

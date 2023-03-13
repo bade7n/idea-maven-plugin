@@ -240,6 +240,17 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
             return String.format("Maven: %s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
     }
 
+    public String formatSystemPath(Artifact artifact) {
+        if (artifact.hasClassifier()) {
+            return String.format("Maven: %s:%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getClassifier(), artifact.getVersion());
+        } else
+            return String.format("Maven: %s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+    }
+
+    public boolean isSystemScope(Artifact artifact) {
+        return Artifact.SCOPE_SYSTEM.equalsIgnoreCase(artifact.getScope());
+    }
+
     public String formatScope(Artifact artifact) {
         if (Artifact.SCOPE_COMPILE.equalsIgnoreCase(getScope(artifact))) {
             return "";
