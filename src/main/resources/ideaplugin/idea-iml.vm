@@ -20,16 +20,20 @@
       </facet>
 #end
     </facet>
-      <facet type="web" name="Web">
-          <configuration>
-              <descriptors>
-                  <deploymentDescriptor name="web.xml" url="file://$MD/webapp/WEB-INF/web.xml" />
-              </descriptors>
-              <webroots>
-                  <root url="file://$MD/webapp" relative="/" />
-              </webroots>
-          </configuration>
-      </facet>
+    <facet type="web" name="Web">
+      <configuration>
+          <descriptors>
+              <deploymentDescriptor name="web.xml" url="file://$MD/webapp/WEB-INF/web.xml" />
+          </descriptors>
+          <webroots>
+              <root url="file://$MD/webapp" relative="/" />
+          </webroots>
+          <sourceRoots>
+              <root url="file://$MD/resources" />
+              <root url="file://$MD/src" />
+          </sourceRoots>
+      </configuration>
+    </facet>
   </component>
 #end
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
