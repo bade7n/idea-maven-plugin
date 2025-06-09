@@ -243,8 +243,13 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
     public String formatSystemPath(Artifact artifact) {
         if (artifact.getFile() != null) {
             File basedir = getProject().getBasedir();
-            Path relativePath = basedir.toPath().relativize(artifact.getFile().toPath());
-            return String.format("$MODULE_DIR$/%s", relativePath.toString());
+            try {
+                Path relativePath = basedir.toPath().relativize(artifact.getFile().toPath());
+                return String.format("$MODULE_DIR$/%s", relativePath.toString());
+            } catch (Exception e) {
+                getLog().error("Failed to formatSystemPath: " + e.getMessage() + " " + basedir + " and " + artifact.getFile());
+                return "FILE_NOT_SET";
+            }
         } else
             return "FILE_NOT_SET";
     }
