@@ -246,6 +246,8 @@ public class IdeaPluginMojo extends IdeaPluginMojoBase {
             try {
                 Path relativePath = basedir.toPath().relativize(artifact.getFile().toPath());
                 return String.format("$MODULE_DIR$/%s", relativePath.toString());
+            } catch (IllegalArgumentException e) {
+                return artifact.getFile().toPath().normalize().toString();
             } catch (Exception e) {
                 getLog().error("Failed to formatSystemPath: " + e.getMessage() + " " + basedir + " and " + artifact.getFile());
                 return "FILE_NOT_SET";
